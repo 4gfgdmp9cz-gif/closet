@@ -1,1 +1,884 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Closet">
+<title>My Closet</title>
 
+<style>
+:root{
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+  color:#171717;
+  background:#f7f7f4
+}
+
+*{
+  box-sizing:border-box
+}
+
+body{
+  margin:0
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit
+}
+
+button{
+  cursor:pointer
+}
+
+button:disabled{
+  opacity:.5;
+  cursor:default
+}
+
+.hidden{
+  display:none!important
+}
+
+.wrap{
+  max-width:760px;
+  margin:auto;
+  padding:18px 16px 110px
+}
+
+.start{
+  position:fixed;
+  inset:0;
+  z-index:10;
+  background:white;
+  color:black;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:30px
+}
+
+.start h1{
+  font-size:clamp(34px,10vw,60px);
+  font-weight:500;
+  letter-spacing:.08em
+}
+
+.start button{
+  border:1px solid #111;
+  background:white;
+  color:#111;
+  border-radius:4px;
+  padding:18px 68px;
+  letter-spacing:.22em;
+  font-size:18px
+}
+
+.head{
+  background:white;
+  border-bottom:1px solid #ddd
+}
+
+.head .wrap{
+  padding:13px 16px
+}
+
+.head h1{
+  margin:0;
+  font-size:23px
+}
+
+.sub{
+  color:#666;
+  font-size:13px
+}
+
+.nav{
+  display:flex;
+  gap:8px;
+  margin-bottom:17px
+}
+
+.nav button{
+  flex:1;
+  border:1px solid #ddd;
+  background:white;
+  border-radius:13px;
+  padding:11px 2px;
+  font-size:14px
+}
+
+.nav .active{
+  background:#171717;
+  color:white;
+  border-color:#171717
+}
+
+.card{
+  border:1px solid #e3e3df;
+  border-radius:18px;
+  background:white;
+  padding:16px;
+  margin-bottom:14px
+}
+
+.card h2{
+  font-size:19px;
+  margin:0 0 14px
+}
+
+.field{
+  display:block;
+  margin:18px 0
+}
+
+.field>span,
+.label{
+  display:block;
+  font-weight:650;
+  margin-bottom:8px
+}
+
+.hint{
+  font-size:13px;
+  color:#626262;
+  line-height:1.55
+}
+
+.field input:not([type=file]),
+.field select,
+.field textarea,
+.search{
+  width:100%;
+  border:1px solid #bdbdb9;
+  border-radius:12px;
+  background:#fff;
+  color:#111;
+  padding:13px;
+  min-height:48px
+}
+
+.field textarea{
+  min-height:80px;
+  resize:vertical
+}
+
+.button{
+  border:0;
+  border-radius:12px;
+  padding:13px 16px;
+  background:#191919;
+  color:white;
+  min-height:46px
+}
+
+.button.light{
+  background:#f1f1ef;
+  color:#151515;
+  border:1px solid #ddd
+}
+
+.button.danger{
+  background:#fff3f2;
+  color:#a22620
+}
+
+.button.full{
+  width:100%
+}
+
+.button.small{
+  padding:8px 12px;
+  min-height:36px;
+  font-size:14px
+}
+
+.row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px
+}
+
+.choice{
+  border:1px solid #bbb;
+  background:white;
+  color:#171717;
+  border-radius:100px;
+  padding:9px 13px;
+  min-height:42px
+}
+
+.choice[aria-pressed=true]{
+  background:#202020;
+  color:white;
+  border-color:#202020
+}
+
+.choice.spring[aria-pressed=true]{
+  background:#eaf4dc;
+  color:#26380c;
+  border-color:#9dbd70
+}
+
+.choice.summer[aria-pressed=true]{
+  background:#fff0ce;
+  color:#4f3900;
+  border-color:#dabb72
+}
+
+.choice.autumn[aria-pressed=true]{
+  background:#f8e7dc;
+  color:#582e1a;
+  border-color:#d4a68b
+}
+
+.choice.winter[aria-pressed=true]{
+  background:#e2edf7;
+  color:#163958;
+  border-color:#91b2cc
+}
+
+.photo-btn{
+  position:relative;
+  display:block;
+  text-align:center;
+  border:1px dashed #aaa;
+  background:#f6f6f3;
+  border-radius:14px;
+  padding:18px;
+  font-weight:650
+}
+
+.photo-btn input{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:pointer
+}
+
+.preview{
+  display:block;
+  max-width:100%;
+  max-height:280px;
+  margin:12px auto;
+  border-radius:10px;
+  object-fit:contain
+}
+
+.error{
+  color:#ad2620
+}
+
+.status{
+  min-height:24px;
+  font-size:14px
+}
+
+.filters{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px
+}
+
+.filters select{
+  min-width:0;
+  width:100%;
+  border:1px solid #bbb;
+  border-radius:10px;
+  background:white;
+  padding:11px 4px;
+  font-size:14px
+}
+
+.chips{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin:10px 0
+}
+
+.chips button{
+  border:1px solid #aaa;
+  border-radius:100px;
+  padding:6px 9px;
+  background:#f1f1ef;
+  font-size:13px
+}
+
+.item{
+  display:grid;
+  grid-template-columns:104px minmax(0,1fr);
+  gap:12px
+}
+
+.item img,
+.no-photo{
+  width:104px;
+  height:120px;
+  border-radius:10px;
+  object-fit:cover;
+  background:#eee;
+  display:grid;
+  place-items:center;
+  color:#777
+}
+
+.item h3{
+  margin:0 0 4px;
+  font-size:17px;
+  overflow-wrap:anywhere
+}
+
+.item p{
+  margin:3px 0;
+  color:#555;
+  font-size:13px;
+  overflow-wrap:anywhere
+}
+
+.item .actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px
+}
+
+.star{
+  font-size:22px;
+  line-height:1
+}
+
+.count{
+  font-size:14px;
+  color:#555;
+  margin:8px 0 13px
+}
+
+.empty{
+  color:#666;
+  text-align:center;
+  padding:30px 10px
+}
+
+.notice{
+  font-size:13px;
+  color:#5c5c5c;
+  line-height:1.6
+}
+
+.settings button{
+  margin:5px 0
+}
+
+.sticky{
+  position:sticky;
+  bottom:0;
+  background:#f7f7f4;
+  padding:10px 0 calc(10px + env(safe-area-inset-bottom))
+}
+
+.field[hidden]{
+  display:none!important
+}
+
+details{
+  margin:16px 0;
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:10px
+}
+
+summary{
+  font-weight:700;
+  cursor:pointer;
+  padding:5px
+}
+
+.field input[type=checkbox]{
+  width:auto;
+  min-height:0
+}
+
+.check{
+  display:flex;
+  align-items:center;
+  gap:8px
+}
+
+.metrics{
+  line-height:1.8;
+  overflow-wrap:anywhere
+}
+
+.item .actions button{
+  width:auto
+}
+
+.item p{
+  white-space:pre-wrap
+}
+
+#outfitsPage .choice{
+  margin:4px
+}
+
+.statusTag{
+  font-weight:700;
+  color:#5c4030
+}
+
+@media(max-width:420px){
+  .filters{
+    grid-template-columns:1fr
+  }
+
+  .item{
+    grid-template-columns:88px minmax(0,1fr)
+  }
+
+  .item img,
+  .no-photo{
+    width:88px;
+    height:104px
+  }
+
+  .nav{
+    flex-wrap:wrap
+  }
+
+  .nav button{
+    flex:1 1 40%
+  }
+}
+
+@media(min-width:720px){
+  .list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px
+  }
+
+  .list .card{
+    margin:0
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="start" class="start">
+  <div>
+    <h1>My Closet</h1>
+    <button id="startButton">START</button>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+
+<header class="head">
+  <div class="wrap">
+    <h1>My Closet</h1>
+    <div class="sub">自分専用クローゼット</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<nav class="nav" aria-label="画面">
+  <button data-page="closet" class="active">クローゼット</button>
+  <button data-page="add">追加</button>
+  <button data-page="outfits">コーデ</button>
+  <button data-page="settings">設定</button>
+</nav>
+
+  <section id="closetPage">
+  <div class="card">
+    <h2>探す</h2>
+
+    <input
+      id="search"
+      class="search"
+      type="search"
+      placeholder="商品名・ブランド・メモ"
+      aria-label="検索"
+    >
+
+    <div class="filters" style="margin-top:8px">
+      <select id="categoryFilter" aria-label="カテゴリー"></select>
+      <select id="colorFilter" aria-label="色"></select>
+      <select id="seasonFilter" aria-label="季節"></select>
+    </div>
+
+    <div id="filterChips" class="chips"></div>
+
+    <div class="row">
+      <button
+        id="favoritesFilter"
+        type="button"
+        class="button light small"
+        aria-pressed="false"
+      >
+        ☆ お気に入りのみ
+      </button>
+
+      <button
+        id="clearFilters"
+        type="button"
+        class="button light small"
+      >
+        条件を消す
+      </button>
+    </div>
+
+    <select
+      id="statusFilter"
+      aria-label="販売状況"
+      class="search"
+    >
+      <option value="">全ての状態</option>
+      <option>所有中</option>
+      <option>出品中</option>
+      <option>売却済み</option>
+      <option>アーカイブ</option>
+    </select>
+
+    <div id="count" class="count"></div>
+  </div>
+
+  <div id="itemList" class="list"></div>
+</section>
+
+<section id="addPage" class="hidden">
+  <form id="itemForm" class="card">
+
+    <h2 id="formTitle">アイテムを追加</h2>
+
+    <p class="hint">
+      大分類だけで保存できます。
+      写真やほかの項目は後から追加できます。
+    </p>
+
+    <div class="field">
+      <span>写真（任意）</span>
+
+      <label class="photo-btn">
+        📷 写真を追加
+        <input
+          id="photo"
+          type="file"
+          accept="image/*"
+          aria-label="写真を追加"
+        >
+      </label>
+
+      <img
+        id="preview"
+        class="preview hidden"
+        alt="選んだ写真のプレビュー"
+      >
+
+      <div id="photoInfo" class="hint"></div>
+    </div>
+
+    <label class="field">
+      <span>
+        大分類
+        <small>必須</small>
+      </span>
+
+      <select id="category" required></select>
+    </label>
+
+    <label class="field">
+      <span>小分類</span>
+      <select id="subcategory"></select>
+    </label>
+
+    <label class="field">
+      <span>ブランド</span>
+
+      <input
+        id="brand"
+        type="text"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="ブランド"
+      >
+    </label>
+
+    <label class="field">
+      <span>商品名</span>
+
+      <input
+        id="name"
+        type="text"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="商品名"
+      >
+    </label>
+
+    <div class="field">
+      <span class="label">
+        色（複数可）
+      </span>
+
+      <div id="colors" class="row"></div>
+
+      <label
+        id="otherColorField"
+        class="field hidden"
+      >
+        <span>その他の色</span>
+
+        <input
+          id="otherColor"
+          type="text"
+          autocomplete="off"
+          placeholder="色を入力"
+        >
+      </label>
+    </div>
+
+    <label class="field">
+      <span>
+        サイズ
+        （任意・入力欄はここだけ）
+      </span>
+
+      <input
+        id="size"
+        type="text"
+        autocomplete="off"
+        placeholder="例：M、または肩幅45cm"
+      >
+    </label>
+
+    <div class="field">
+      <span class="label">
+        季節（複数可）
+      </span>
+
+      <div id="seasons" class="row"></div>
+    </div>
+
+    <div class="field">
+      <span class="label">
+        対象
+      </span>
+
+      <div id="audiences" class="row"></div>
+    </div>
+
+    <datalist id="brandSuggestions"></datalist>
+
+    <details>
+      <summary>
+        購入・管理（任意）
+      </summary>
+
+      <label class="field">
+        <span>素材</span>
+        <input id="material" type="text">
+      </label>
+
+      <label class="field">
+        <span>状態</span>
+
+        <select id="condition">
+          <option value="">未設定</option>
+          <option>新品</option>
+          <option>美品</option>
+          <option>使用感あり</option>
+          <option>要修理</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>購入価格（円）</span>
+
+        <input
+          id="purchasePrice"
+          type="number"
+          min="0"
+          step="1"
+        >
+      </label>
+
+      <label class="field">
+        <span>購入日</span>
+
+        <input
+          id="purchaseDate"
+          type="date"
+        >
+      </label>
+
+      <label class="field">
+        <span>着用シーン</span>
+
+        <input
+          id="occasion"
+          type="text"
+          placeholder="仕事・休日など"
+        >
+      </label>
+
+      <label class="field">
+        <span>保管場所</span>
+
+        <input
+          id="storageLocation"
+          type="text"
+        >
+      </label>
+
+      <label class="field">
+        <span>メンテ・修理記録</span>
+
+        <textarea id="maintenance"></textarea>
+      </label>
+    </details>
+
+    <details>
+      <summary>
+        販売・店舗
+      </summary>
+
+      <label class="field">
+        <span>状態</span>
+
+        <select id="saleStatus">
+          <option>所有中</option>
+          <option>出品中</option>
+          <option>売却済み</option>
+          <option>アーカイブ</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>販売先・店舗</span>
+
+        <input
+          id="marketplace"
+          type="text"
+        >
+      </label>
+
+      <label class="field">
+        <span>出品日</span>
+
+        <input
+          id="listedDate"
+          type="date"
+        >
+      </label>
+
+      <label class="field">
+        <span>売却日</span>
+
+        <input
+          id="soldDate"
+          type="date"
+        >
+      </label>
+
+      <label class="field">
+        <span>販売価格（円）</span>
+
+        <input
+          id="salePrice"
+          type="number"
+          min="0"
+          step="1"
+        >
+      </label>
+
+      <label class="field">
+        <span>手数料（円）</span>
+
+        <input
+          id="fee"
+          type="number"
+          min="0"
+          step="1"
+        >
+      </label>
+
+      <label class="field">
+        <span>送料（円）</span>
+
+        <input
+          id="shipping"
+          type="number"
+          min="0"
+          step="1"
+        >
+      </label>
+
+      <label class="field">
+        <span>その他費用（円）</span>
+
+        <input
+          id="otherCost"
+          type="number"
+          min="0"
+          step="1"
+        >
+      </label>
+
+      <div
+        id="profitPreview"
+        class="metrics"
+      ></div>
+    </details>
+
+    <label class="field">
+      <span>メモ</span>
+
+      <textarea
+        id="memo"
+        placeholder="メモ"
+      ></textarea>
+    </label>
+
+    <p
+      id="duplicateNotice"
+      class="notice"
+      role="status"
+    ></p>
+
+    <p
+      id="formStatus"
+      class="status"
+      role="status"
+    ></p>
+
+    <div class="sticky">
+      <button
+        class="button full"
+        type="submit"
+      >
+        保存する
+      </button>
+
+      <button
+        id="cancelEdit"
+        type="button"
+        class="button light full hidden"
+      >
+        編集をやめる
+      </button>
+    </div>
+
+  </form>
+</section>
+  
